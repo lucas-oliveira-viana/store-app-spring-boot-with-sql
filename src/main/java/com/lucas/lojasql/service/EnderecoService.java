@@ -1,14 +1,14 @@
 package com.lucas.lojasql.service;
 
-import static com.lucas.lojasql.dao.DaoFactory.createEnderecoDao;
+import static com.lucas.lojasql.interfaces.DaoFactory.createEnderecoDao;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.lucas.lojasql.dao.DaoFactory;
-import com.lucas.lojasql.dao.EnderecoInterface;
 import com.lucas.lojasql.entities.Endereco;
+import com.lucas.lojasql.interfaces.DaoFactory;
+import com.lucas.lojasql.interfaces.EnderecoInterface;
 
 @Service
 public class EnderecoService implements EnderecoInterface{

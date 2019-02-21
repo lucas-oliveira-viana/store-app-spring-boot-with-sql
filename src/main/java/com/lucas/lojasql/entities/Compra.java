@@ -1,7 +1,6 @@
 package com.lucas.lojasql.entities;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Compra {
 
@@ -25,6 +24,8 @@ public class Compra {
 		this.formaPagamento = formaPagamento;
 	}
 	
+	public Compra() {
+	}
 
 	public Integer getId() {
 		return id;
@@ -38,7 +39,7 @@ public class Compra {
 		return produtosComprados;
 	}
 
-	public void setCesta(List<ProdutoComprado> produtosComprados) {
+	public void setProdutosComprados(List<ProdutoComprado> produtosComprados) {
 		this.produtosComprados = produtosComprados;
 	}
 
@@ -72,15 +73,5 @@ public class Compra {
 
 	public void setValorTotal(Double valorTotal) {
 		this.valorTotal = valorTotal;
-	}
-
-	public static void definirValorTotal(Compra compra) {
-		double somaValorDeTodosOsProdutos = listValorDeCadaProdutoComprado(compra).stream().mapToDouble(valorProduto -> valorProduto).sum();
-		compra.setValorTotal(somaValorDeTodosOsProdutos);
-	}
-
-	public static List<Double> listValorDeCadaProdutoComprado(Compra compra) {
-		return compra.getProdutosComprados().stream().map(produto -> produto.getValor() * produto.getQuantidade())
-				.collect(Collectors.toList());
 	}
 }

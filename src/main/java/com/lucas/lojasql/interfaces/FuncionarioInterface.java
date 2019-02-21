@@ -1,4 +1,4 @@
-package com.lucas.lojasql.dao;
+package com.lucas.lojasql.interfaces;
 
 import java.util.List;
 
@@ -11,6 +11,10 @@ public interface FuncionarioInterface {
 	Funcionario findById(Integer id);
 	
 	Funcionario findByCpf(String cpf);
+	
+	Funcionario findByRg(String rg);
+	
+	Funcionario findByEmail(String email);
 	
 	void insert(Funcionario cliente);
 	

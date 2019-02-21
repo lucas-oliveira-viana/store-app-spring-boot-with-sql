@@ -9,7 +9,7 @@ public class ProdutoDTO implements Serializable {
 
 	private String nome;
 	private Double valor;
-	private String codigoBarras;
+	private Integer codigoBarras;
 
 	public ProdutoDTO() {
 	}
@@ -36,11 +36,11 @@ public class ProdutoDTO implements Serializable {
 		this.valor = valor;
 	}
 
-	public String getCodigoBarras() {
+	public Integer getCodigoBarras() {
 		return codigoBarras;
 	}
 
-	public void setCodigoBarras(String codigoBarras) {
+	public void setCodigoBarras(Integer codigoBarras) {
 		this.codigoBarras = codigoBarras;
 	}
 }

@@ -1,4 +1,4 @@
-package com.lucas.lojasql.dao.impl;
+package com.lucas.lojasql.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,10 +8,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lucas.lojasql.dao.EstoqueInterface;
-import com.lucas.lojasql.database.DB;
-import com.lucas.lojasql.database.DBException;
 import com.lucas.lojasql.entities.Estoque;
+import com.lucas.lojasql.interfaces.EstoqueInterface;
+import com.lucas.lojasql.jdbc.DB;
+import com.lucas.lojasql.jdbc.DBException;
 
 public class EstoqueRepository implements EstoqueInterface {
 
@@ -48,12 +48,12 @@ public class EstoqueRepository implements EstoqueInterface {
 	}
 
 	@Override
-	public Estoque findByCodigoBarras(String codigoDeBarras) {
+	public Estoque findByCodigoBarras(Integer codigoDeBarras) {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
 			ps = conn.prepareStatement("SELECT * FROM estoque WHERE CodigoBarras = ?");
-			ps.setString(1, codigoDeBarras);
+			ps.setInt(1, codigoDeBarras);
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
@@ -77,7 +77,7 @@ public class EstoqueRepository implements EstoqueInterface {
 							+ " (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 
-			setaEstoqueDaRequisicao(estoque, ps);
+			preencheInterrogacoesEstoque(estoque, ps);
 			int linhasAdicionadas = ps.executeUpdate();
 
 			if (linhasAdicionadas > 0) {
@@ -100,8 +100,9 @@ public class EstoqueRepository implements EstoqueInterface {
 		try {
 			ps = conn.prepareStatement("UPDATE estoque SET Nome = ?, Valor = ?, CodigoBarras = ?"
 					+ ", Estoque = ? WHERE id = ?");
-			setaEstoqueDaRequisicao(estoque, ps);
+			preencheInterrogacoesEstoque(estoque, ps);
 			ps.setInt(5, estoque.getId());
+			ps.executeUpdate();
 			ps.executeUpdate();
 		} catch (SQLException e) {
 			throw new DBException(e.getMessage());
@@ -111,11 +112,26 @@ public class EstoqueRepository implements EstoqueInterface {
 	}
 
 	@Override
-	public void deleteByCodigoBarras(String codigoDeBarras) {
+	public void deleteByCodigoBarras(Integer codigoDeBarras) {
 		PreparedStatement ps = null;
 		try {
 			ps = conn.prepareStatement("DELETE FROM estoque WHERE CodigoBarras = ?");
-			ps.setString(1, codigoDeBarras);
+			ps.setInt(1, codigoDeBarras);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		} finally {
+			DB.closeStatement(ps);
+		}
+	}
+	
+	@Override
+	public void updateQuantidadeEstoqueDoProduto(Integer quantidade, Integer id) {
+		PreparedStatement ps = null;
+		try {
+			ps = conn.prepareStatement("UPDATE estoque SET Estoque = ? WHERE id = ?");
+			ps.setInt(1, quantidade);
+			ps.setInt(2, id);
 			ps.executeUpdate();
 		} catch (SQLException e) {
 			throw new DBException(e.getMessage());
@@ -129,7 +145,7 @@ public class EstoqueRepository implements EstoqueInterface {
 		estoque.setId(rs.getInt("Id"));
 		estoque.setNome(rs.getString("Nome"));
 		estoque.setValor(rs.getDouble("Valor"));
-		estoque.setCodigoBarras(rs.getString("CodigoBarras"));
+		estoque.setCodigoBarras(rs.getInt("CodigoBarras"));
 		estoque.setEstoque(rs.getInt("Estoque"));
 		return estoque;
 	}
@@ -142,10 +158,11 @@ public class EstoqueRepository implements EstoqueInterface {
 		return rs;
 	}
 	
-	private void setaEstoqueDaRequisicao(Estoque estoque, PreparedStatement ps) throws SQLException {
+	private void preencheInterrogacoesEstoque(Estoque estoque, PreparedStatement ps) throws SQLException {
 		ps.setString(1, estoque.getNome());
 		ps.setDouble(2, estoque.getValor());
-		ps.setString(3, estoque.getCodigoBarras());
+		ps.setInt(3, estoque.getCodigoBarras());
 		ps.setInt(4, estoque.getEstoque());
 	}
+
 }

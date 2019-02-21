@@ -1,4 +1,4 @@
-package com.lucas.lojasql.dao.impl;
+package com.lucas.lojasql.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,10 +8,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lucas.lojasql.dao.EnderecoInterface;
-import com.lucas.lojasql.database.DB;
-import com.lucas.lojasql.database.DBException;
 import com.lucas.lojasql.entities.Endereco;
+import com.lucas.lojasql.interfaces.EnderecoInterface;
+import com.lucas.lojasql.jdbc.DB;
+import com.lucas.lojasql.jdbc.DBException;
 
 public class EnderecoRepository implements EnderecoInterface {
 
@@ -94,7 +94,7 @@ public class EnderecoRepository implements EnderecoInterface {
 			ps = conn.prepareStatement("INSERT INTO endereco (Cep, Pais, Estado, Cidade, Bairro, Rua, Numero) VALUES "
 					+ " (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
-			setaEnderecoDaRequisicao(endereco, ps);
+			preecheInterrogacoesEndereco(endereco, ps);
 			int linhasAdicionadas = ps.executeUpdate();
 
 			if (linhasAdicionadas > 0) {
@@ -131,7 +131,7 @@ public class EnderecoRepository implements EnderecoInterface {
 		return rs;
 	}
 
-	private void setaEnderecoDaRequisicao(Endereco endereco, PreparedStatement ps) throws SQLException {
+	private void preecheInterrogacoesEndereco(Endereco endereco, PreparedStatement ps) throws SQLException {
 		ps.setString(1, endereco.getCep());
 		ps.setString(2, endereco.getPais());
 		ps.setString(3, endereco.getEstado());

@@ -1,4 +1,4 @@
-package com.lucas.lojasql.dao;
+package com.lucas.lojasql.interfaces;
 
 import java.util.List;
 

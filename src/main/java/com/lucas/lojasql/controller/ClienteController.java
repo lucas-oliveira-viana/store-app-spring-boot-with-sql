@@ -1,7 +1,7 @@
 package com.lucas.lojasql.controller;
 
-import static com.lucas.lojasql.controller.utils.FromDTO.fromDTOCliente;
-import static com.lucas.lojasql.controller.utils.ToDTO.passarClienteParaDTO;
+import static com.lucas.lojasql.utils.FromDTO.fromDTOCliente;
+import static com.lucas.lojasql.utils.ToDTO.passarClienteParaDTO;
 
 import java.util.List;
 
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lucas.lojasql.controller.utils.Decoder;
 import com.lucas.lojasql.dto.ClienteDTO;
 import com.lucas.lojasql.entities.Cliente;
 import com.lucas.lojasql.service.ClienteService;
+import com.lucas.lojasql.utils.Decoder;
 
 @RestController
 @RequestMapping(value = "/loja/cliente")

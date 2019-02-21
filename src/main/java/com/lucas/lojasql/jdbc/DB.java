@@ -1,4 +1,4 @@
-package com.lucas.lojasql.database;
+package com.lucas.lojasql.jdbc;
 
 import java.io.FileInputStream;
 import java.io.IOException;

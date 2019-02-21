@@ -1,4 +1,4 @@
-package com.lucas.lojasql.controller.utils;
+package com.lucas.lojasql.utils;
 
 import java.util.List;
 import java.util.stream.Collectors;

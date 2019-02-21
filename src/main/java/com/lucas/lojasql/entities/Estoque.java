@@ -5,7 +5,7 @@ public class Estoque extends Produto {
 	private Integer id;
 	private Integer estoque;
 
-	public Estoque(Integer id, String nome, Double valor, String codigoBarras, Integer estoque) {
+	public Estoque(Integer id, String nome, Double valor, Integer codigoBarras, Integer estoque) {
 		super(nome, valor, codigoBarras);
 		this.id = id;
 		this.estoque = estoque;

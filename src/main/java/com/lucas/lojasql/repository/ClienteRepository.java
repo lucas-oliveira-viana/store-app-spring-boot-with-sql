@@ -1,4 +1,4 @@
-package com.lucas.lojasql.dao.impl;
+package com.lucas.lojasql.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,11 +8,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lucas.lojasql.dao.ClienteInterface;
-import com.lucas.lojasql.database.DB;
-import com.lucas.lojasql.database.DBException;
 import com.lucas.lojasql.entities.Cliente;
 import com.lucas.lojasql.entities.Endereco;
+import com.lucas.lojasql.interfaces.ClienteInterface;
+import com.lucas.lojasql.jdbc.DB;
+import com.lucas.lojasql.jdbc.DBException;
 
 public class ClienteRepository implements ClienteInterface {
 
@@ -100,7 +100,7 @@ public class ClienteRepository implements ClienteInterface {
 							+ " (?, ?, ?, ?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 
-			setaClienteDaRequisicao(cliente, ps);
+			preencheInterrogacoesCliente(cliente, ps);
 			int linhasAdicionadas = ps.executeUpdate();
 
 			if (linhasAdicionadas > 0) {
@@ -122,7 +122,7 @@ public class ClienteRepository implements ClienteInterface {
 		try {
 			ps = conn.prepareStatement("UPDATE cliente SET Nome = ?, DataNascimento = ?, Cpf = ?"
 					+ ", Rg = ?, Email = ?, Telefone = ?, id_endereco = ? WHERE id = ?");
-			setaClienteDaRequisicao(cliente, ps);
+			preencheInterrogacoesCliente(cliente, ps);
 			ps.setInt(8, cliente.getId());
 			ps.executeUpdate();
 		} catch (SQLException e) {
@@ -143,6 +143,49 @@ public class ClienteRepository implements ClienteInterface {
 			throw new DBException(e.getMessage());
 		} finally {
 			DB.closeStatement(ps);
+		}
+	}
+
+	@Override
+	public Cliente findByRg(String rg) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT * FROM cliente c JOIN endereco e ON c.id_endereco = e.id WHERE Rg = ?");
+			ps.setString(1, rg);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Cliente cliente = getColunasDaTabelaCliente(rs);
+				return cliente;
+			}
+			return null;
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		} finally {
+			DB.fecharConexoes(ps, rs);
+		}
+	}
+
+	@Override
+	public Cliente findByEmail(String email) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement(
+					"SELECT * FROM cliente c JOIN endereco e ON c.id_endereco = e.id WHERE Email = ?");
+			ps.setString(1, email);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Cliente cliente = getColunasDaTabelaCliente(rs);
+				return cliente;
+			}
+			return null;
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		} finally {
+			DB.fecharConexoes(ps, rs);
 		}
 	}
 
@@ -170,7 +213,7 @@ public class ClienteRepository implements ClienteInterface {
 		return cliente;
 	}
 
-	private void setaClienteDaRequisicao(Cliente cliente, PreparedStatement ps) throws SQLException {
+	private void preencheInterrogacoesCliente(Cliente cliente, PreparedStatement ps) throws SQLException {
 		ps.setString(1, cliente.getNome());
 		ps.setDate(2, new java.sql.Date(cliente.getDataNascimento().getTime()));
 		ps.setString(3, cliente.getCPF());
@@ -179,5 +222,4 @@ public class ClienteRepository implements ClienteInterface {
 		ps.setString(6, cliente.getTelefone());
 		ps.setInt(7, cliente.getEndereco().getId());
 	}
-
 }

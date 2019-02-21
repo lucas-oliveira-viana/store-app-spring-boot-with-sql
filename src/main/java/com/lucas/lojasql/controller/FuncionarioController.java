@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lucas.lojasql.controller.utils.Decoder;
-import com.lucas.lojasql.controller.utils.FromDTO;
-import com.lucas.lojasql.controller.utils.ToDTO;
 import com.lucas.lojasql.dto.FuncionarioDTO;
 import com.lucas.lojasql.entities.Funcionario;
 import com.lucas.lojasql.service.FuncionarioService;
+import com.lucas.lojasql.utils.Decoder;
+import com.lucas.lojasql.utils.FromDTO;
+import com.lucas.lojasql.utils.ToDTO;
 
 @RestController
 @RequestMapping(value = "/loja/funcionario")

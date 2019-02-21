@@ -15,7 +15,6 @@ public class Endereco {
 	}
 
 	public Endereco(String cep, String pais, String estado, String cidade, String bairro, String rua, String numero) {
-		super();
 		this.cep = cep;
 		this.pais = pais;
 		this.estado = estado;

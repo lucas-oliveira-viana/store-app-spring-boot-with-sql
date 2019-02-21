@@ -1,4 +1,4 @@
-package com.lucas.lojasql.dao;
+package com.lucas.lojasql.interfaces;
 
 import java.util.List;
 
@@ -8,13 +8,13 @@ public interface CompraInterface {
 
 	List<Compra> findAll();
 
-	Compra findById(String id);
+	Compra findById(Integer id);
 
-	Compra findByProdutoComprado(String produtoComprado);
+	List<Compra> findByProdutoComprado(String produtoComprado);
 
 	void insert(Compra compra);
 
 	void update(Compra compra);
 
-	void deleteById(String id);
+	void deleteById(Integer id);
 }

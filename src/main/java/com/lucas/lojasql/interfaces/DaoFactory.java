@@ -1,12 +1,14 @@
-package com.lucas.lojasql.dao;
+package com.lucas.lojasql.interfaces;
 
-import com.lucas.lojasql.dao.impl.CestaRepository;
-import com.lucas.lojasql.dao.impl.ClienteRepository;
-import com.lucas.lojasql.dao.impl.CompraRepository;
-import com.lucas.lojasql.dao.impl.EnderecoRepository;
-import com.lucas.lojasql.dao.impl.EstoqueRepository;
-import com.lucas.lojasql.dao.impl.FuncionarioRepository;
-import com.lucas.lojasql.database.DB;
+import com.lucas.lojasql.jdbc.DB;
+import com.lucas.lojasql.repository.CestaRepository;
+import com.lucas.lojasql.repository.ClienteRepository;
+import com.lucas.lojasql.repository.CompraRepository;
+import com.lucas.lojasql.repository.EnderecoRepository;
+import com.lucas.lojasql.repository.EstoqueRepository;
+import com.lucas.lojasql.repository.FuncionarioRepository;
+import com.lucas.lojasql.validator.ValidatorDocumentoBanco;
+import com.lucas.lojasql.validator.ValidatorDocumentoBancoInterface;
 
 public class DaoFactory {
 
@@ -32,5 +34,9 @@ public class DaoFactory {
 	
 	public static CestaInterface createCestaDao() {
 		return new CestaRepository(DB.getConnection());
+	}
+	
+	public static ValidatorDocumentoBancoInterface inicializaValidacoes() {
+		return new ValidatorDocumentoBanco();
 	}
 }

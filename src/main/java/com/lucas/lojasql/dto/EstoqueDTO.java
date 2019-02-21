@@ -7,7 +7,7 @@ public class EstoqueDTO{
 	private Integer id;
 	private String nome;
 	private Double valor;
-	private String codigoBarras;
+	private Integer codigoBarras;
 	private Integer estoque;
 	
 	public EstoqueDTO() {
@@ -45,11 +45,11 @@ public class EstoqueDTO{
 		this.valor = valor;
 	}
 
-	public String getCodigoBarras() {
+	public Integer getCodigoBarras() {
 		return codigoBarras;
 	}
 
-	public void setCodigoBarras(String codigoBarras) {
+	public void setCodigoBarras(Integer codigoBarras) {
 		this.codigoBarras = codigoBarras;
 	}
 

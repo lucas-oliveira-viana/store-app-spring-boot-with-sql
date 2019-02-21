@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lucas.lojasql.controller.utils.FromDTO;
-import com.lucas.lojasql.controller.utils.ToDTO;
 import com.lucas.lojasql.dto.EnderecoDTO;
 import com.lucas.lojasql.entities.Endereco;
 import com.lucas.lojasql.service.EnderecoService;
+import com.lucas.lojasql.utils.FromDTO;
+import com.lucas.lojasql.utils.ToDTO;
 
 @RestController
 @RequestMapping(value = "/loja/endereco")

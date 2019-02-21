@@ -1,4 +1,4 @@
-package com.lucas.lojasql.controller.utils;
+package com.lucas.lojasql.utils;
 
 import com.lucas.lojasql.dto.CompraDTO;
 import com.lucas.lojasql.entities.Compra;

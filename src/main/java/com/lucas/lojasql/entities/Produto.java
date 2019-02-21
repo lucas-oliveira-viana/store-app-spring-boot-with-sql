@@ -4,9 +4,9 @@ public abstract class Produto {
 
 	private String nome;
 	private Double valor;
-	private String codigoBarras;
+	private Integer codigoBarras;
 	
-	public Produto(String nome, Double valor, String codigoBarras) {
+	public Produto(String nome, Double valor, Integer codigoBarras) {
 		this.nome = nome;
 		this.valor = valor;
 		this.codigoBarras = codigoBarras;
@@ -31,11 +31,11 @@ public abstract class Produto {
 		this.valor = valor;
 	}
 
-	public String getCodigoBarras() {
+	public Integer getCodigoBarras() {
 		return codigoBarras;
 	}
 
-	public void setCodigoBarras(String codigoBarras) {
+	public void setCodigoBarras(Integer codigoBarras) {
 		this.codigoBarras = codigoBarras;
 	}
 }

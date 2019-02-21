@@ -1,13 +1,13 @@
 package com.lucas.lojasql.service;
 
-import static com.lucas.lojasql.dao.DaoFactory.createEstoqueDao;
+import static com.lucas.lojasql.interfaces.DaoFactory.createEstoqueDao;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.lucas.lojasql.dao.EstoqueInterface;
 import com.lucas.lojasql.entities.Estoque;
+import com.lucas.lojasql.interfaces.EstoqueInterface;
 
 @Service
 public class EstoqueService implements EstoqueInterface{
@@ -18,7 +18,7 @@ public class EstoqueService implements EstoqueInterface{
 	}
 
 	@Override
-	public Estoque findByCodigoBarras(String codigoDeBarras) {
+	public Estoque findByCodigoBarras(Integer codigoDeBarras) {
 		return createEstoqueDao().findByCodigoBarras(codigoDeBarras);
 	}
 
@@ -33,7 +33,12 @@ public class EstoqueService implements EstoqueInterface{
 	}
 	
 	@Override
-	public void deleteByCodigoBarras(String codigoDeBarras) {
+	public void deleteByCodigoBarras(Integer codigoDeBarras) {
 		createEstoqueDao().deleteByCodigoBarras(codigoDeBarras);
+	}
+
+	@Override
+	public void updateQuantidadeEstoqueDoProduto(Integer quantidade, Integer id) {
+		createEstoqueDao().updateQuantidadeEstoqueDoProduto(quantidade, id);
 	}
 }

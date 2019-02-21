@@ -1,4 +1,4 @@
-package com.lucas.lojasql.dao.impl;
+package com.lucas.lojasql.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,11 +8,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lucas.lojasql.dao.FuncionarioInterface;
-import com.lucas.lojasql.database.DB;
-import com.lucas.lojasql.database.DBException;
 import com.lucas.lojasql.entities.Endereco;
 import com.lucas.lojasql.entities.Funcionario;
+import com.lucas.lojasql.interfaces.FuncionarioInterface;
+import com.lucas.lojasql.jdbc.DB;
+import com.lucas.lojasql.jdbc.DBException;
 
 public class FuncionarioRepository implements FuncionarioInterface {
 
@@ -34,7 +34,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 			List<Funcionario> funcionarios = new ArrayList<>();
 
 			while (rs.next()) {
-				funcionarios.add(pegaColunasDaTabelaFuncionario(rs));
+				funcionarios.add(getColunasDaTabelaFuncionario(rs));
 			}
 			if (funcionarios.size() > 0) {
 				return funcionarios;
@@ -49,8 +49,24 @@ public class FuncionarioRepository implements FuncionarioInterface {
 
 	@Override
 	public Funcionario findById(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			ps = conn.prepareStatement("SELECT * FROM funcionario WHERE Id = ?");
+			ps.setInt(1, id);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Funcionario funcionario = getColunasDaTabelaFuncionario(rs);
+				return funcionario;
+			}
+			return null;
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		} finally {
+			DB.fecharConexoes(ps, rs);
+		}
 	}
 	
 	@Override
@@ -64,7 +80,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Funcionario funcionario = pegaColunasDaTabelaFuncionario(rs);
+				Funcionario funcionario = getColunasDaTabelaFuncionario(rs);
 				return funcionario;
 			}
 			return null;
@@ -84,7 +100,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 							+ "VALUES " + " (?, ?, ?, ?, ?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 
-			setaFuncionarioDaRequisicao(funcionario, ps);
+			preencheInterrogacoesFuncionario(funcionario, ps);
 			int linhasAdicionadas = ps.executeUpdate();
 
 			if (linhasAdicionadas > 0) {
@@ -115,7 +131,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 		try {
 			ps = conn.prepareStatement("UPDATE funcionario SET Nome = ?, DataNascimento = ?, Cpf = ?"
 					+ ", Rg = ?, Email = ?, Telefone = ?, Cargo = ?, id_endereco = ? WHERE id = ?");
-			setaFuncionarioDaRequisicao(funcionario, ps);
+			preencheInterrogacoesFuncionario(funcionario, ps);
 			ps.setInt(9, funcionario.getId());
 			ps.executeUpdate();
 		} catch (SQLException e) {
@@ -139,7 +155,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 		}
 	}
 
-	private Funcionario pegaColunasDaTabelaFuncionario(ResultSet rs) throws SQLException {
+	private Funcionario getColunasDaTabelaFuncionario(ResultSet rs) throws SQLException {
 		Funcionario funcionario = new Funcionario();
 		funcionario.setId(rs.getInt("Id"));
 		funcionario.setNome(rs.getString("Nome"));
@@ -156,7 +172,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 		return funcionario;
 	}
 
-	private void setaFuncionarioDaRequisicao(Funcionario funcionario, PreparedStatement ps) throws SQLException {
+	private void preencheInterrogacoesFuncionario(Funcionario funcionario, PreparedStatement ps) throws SQLException {
 		ps.setString(1, funcionario.getNome());
 		ps.setDate(2, new java.sql.Date(funcionario.getDataNascimento().getTime()));
 		ps.setString(3, funcionario.getCPF());
@@ -166,5 +182,49 @@ public class FuncionarioRepository implements FuncionarioInterface {
 		ps.setString(7, funcionario.getCargo());
 		ps.setInt(8, funcionario.getEndereco().getId());
 	}
+
+	@Override
+	public Funcionario findByRg(String rg) {
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+
+			try {
+				ps = conn.prepareStatement("SELECT * FROM funcionario WHERE Rg = ?");
+				ps.setString(1, rg);
+				rs = ps.executeQuery();
+
+				while (rs.next()) {
+					Funcionario funcionario = getColunasDaTabelaFuncionario(rs);
+					return funcionario;
+				}
+				return null;
+			} catch (SQLException e) {
+				throw new DBException(e.getMessage());
+			} finally {
+				DB.fecharConexoes(ps, rs);
+			}
+		}
+
+	@Override
+	public Funcionario findByEmail(String email) {
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+
+			try {
+				ps = conn.prepareStatement("SELECT * FROM funcionario WHERE Email = ?");
+				ps.setString(1, email);
+				rs = ps.executeQuery();
+
+				while (rs.next()) {
+					Funcionario funcionario = getColunasDaTabelaFuncionario(rs);
+					return funcionario;
+				}
+				return null;
+			} catch (SQLException e) {
+				throw new DBException(e.getMessage());
+			} finally {
+				DB.fecharConexoes(ps, rs);
+			}
+		}
 
 }

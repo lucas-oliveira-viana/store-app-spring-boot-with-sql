@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lucas.lojasql.controller.utils.FromDTO;
-import com.lucas.lojasql.controller.utils.ToDTO;
 import com.lucas.lojasql.dto.EstoqueDTO;
 import com.lucas.lojasql.entities.Estoque;
 import com.lucas.lojasql.service.EstoqueService;
+import com.lucas.lojasql.utils.FromDTO;
+import com.lucas.lojasql.utils.ToDTO;
 
 @RestController
 @RequestMapping(value = "/loja/estoque")
@@ -37,14 +37,14 @@ public class EstoqueController {
 	@PostMapping(value = "/cadastro")
 	public ResponseEntity<Estoque> cadastrarProduto(@RequestBody EstoqueDTO produtoParaSerCadastradoDTO) {
 		
-		Estoque ProdutosParaSeremCadastrados = FromDTO.fromDTOEstoque(produtoParaSerCadastradoDTO);
+		Estoque produtoParaSerCadastrado = FromDTO.fromDTOEstoque(produtoParaSerCadastradoDTO);
 		
-		estoqueService.insert(ProdutosParaSeremCadastrados);
-		return ResponseEntity.ok().body(ProdutosParaSeremCadastrados);
+		estoqueService.insert(produtoParaSerCadastrado);
+		return ResponseEntity.ok().body(produtoParaSerCadastrado);
 	}
 	
 	@DeleteMapping(value = "/deletar/{codigoBarras}")
-	public ResponseEntity<String> deleteProduto(@PathVariable String codigoBarras) {
+	public ResponseEntity<String> deleteProduto(@PathVariable Integer codigoBarras) {
 		estoqueService.deleteByCodigoBarras(codigoBarras);
 		return ResponseEntity.ok().body("O Produto do id: " + codigoBarras + " foi excluído");
 	}

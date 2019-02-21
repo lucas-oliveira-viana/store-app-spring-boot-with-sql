@@ -8,7 +8,7 @@ public class ProdutoComprado extends Produto{
 	private Integer quantidade;
 	private Double valorTotalProduto;
 	
-	public ProdutoComprado(String nome, Integer idCompra, Double valor, String codigoBarras, Integer quantidade) {
+	public ProdutoComprado(String nome, Integer idCompra, Integer idEstoque, Double valor, Integer codigoBarras, Integer quantidade) {
 		super(nome, valor, codigoBarras);
 		this.quantidade = quantidade;
 		this.idCompra = idCompra;
