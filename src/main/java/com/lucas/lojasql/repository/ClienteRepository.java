@@ -90,62 +90,7 @@ public class ClienteRepository implements ClienteInterface {
 			DB.fecharConexoes(ps, rs);
 		}
 	}
-
-	@Override
-	public void insert(Cliente cliente) {
-		PreparedStatement ps = null;
-		try {
-			ps = conn.prepareStatement(
-					"INSERT INTO cliente " + "(Nome, DataNascimento, Cpf, Rg, Email, Telefone, id_endereco) VALUES "
-							+ " (?, ?, ?, ?, ?, ?, ?)",
-					Statement.RETURN_GENERATED_KEYS);
-
-			preencheInterrogacoesCliente(cliente, ps);
-			int linhasAdicionadas = ps.executeUpdate();
-
-			if (linhasAdicionadas > 0) {
-				ResultSet rs = setaIdDeTodosClientesAdicionados(cliente, ps);
-				DB.closeResultSet(rs);
-			} else {
-				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
-			}
-		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
-		} finally {
-			DB.closeStatement(ps);
-		}
-	}
-
-	@Override
-	public void update(Cliente cliente) {
-		PreparedStatement ps = null;
-		try {
-			ps = conn.prepareStatement("UPDATE cliente SET Nome = ?, DataNascimento = ?, Cpf = ?"
-					+ ", Rg = ?, Email = ?, Telefone = ?, id_endereco = ? WHERE id = ?");
-			preencheInterrogacoesCliente(cliente, ps);
-			ps.setInt(8, cliente.getId());
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
-		} finally {
-			DB.closeStatement(ps);
-		}
-	}
-
-	@Override
-	public void deleteById(Integer id) {
-		PreparedStatement ps = null;
-		try {
-			ps = conn.prepareStatement("DELETE FROM cliente WHERE id = ?");
-			ps.setInt(1, id);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
-		} finally {
-			DB.closeStatement(ps);
-		}
-	}
-
+	
 	@Override
 	public Cliente findByRg(String rg) {
 		PreparedStatement ps = null;
@@ -186,6 +131,92 @@ public class ClienteRepository implements ClienteInterface {
 			throw new DBException(e.getMessage());
 		} finally {
 			DB.fecharConexoes(ps, rs);
+		}
+	}
+
+	@Override
+	public void insert(Cliente cliente) {
+		PreparedStatement ps = null;
+		try {
+			
+			conn.setAutoCommit(false);
+			
+			ps = conn.prepareStatement(
+					"INSERT INTO cliente " + "(Nome, DataNascimento, Cpf, Rg, Email, Telefone, id_endereco) VALUES "
+							+ " (?, ?, ?, ?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+
+			preencheInterrogacoesCliente(cliente, ps);
+			int linhasAdicionadas = ps.executeUpdate();
+			
+			conn.commit();
+
+			if (linhasAdicionadas > 0) {
+				ResultSet rs = setaIdDeTodosClientesAdicionados(cliente, ps);
+				DB.closeResultSet(rs);
+			} else {
+				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
+			}
+		}  catch (SQLException e) {
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
+		} finally {
+			DB.closeStatement(ps);
+		}
+	}
+
+	@Override
+	public void update(Cliente cliente) {
+		PreparedStatement ps = null;
+		try {
+			
+			conn.setAutoCommit(false);
+			ps = conn.prepareStatement("UPDATE cliente SET Nome = ?, DataNascimento = ?, Cpf = ?"
+					+ ", Rg = ?, Email = ?, Telefone = ?, id_endereco = ? WHERE id = ?");
+			preencheInterrogacoesCliente(cliente, ps);
+			ps.setInt(8, cliente.getId());
+			ps.executeUpdate();
+			
+			conn.commit();
+			
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
+		} finally {
+			DB.closeStatement(ps);
+		}
+	}
+
+	@Override
+	public void deleteById(Integer id) {
+		PreparedStatement ps = null;
+		try {
+			
+			conn.setAutoCommit(false);
+			
+			ps = conn.prepareStatement("DELETE FROM cliente WHERE id = ?");
+			ps.setInt(1, id);
+			ps.executeUpdate();
+			
+			conn.commit();
+			
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
+		} finally {
+			DB.closeStatement(ps);
 		}
 	}
 

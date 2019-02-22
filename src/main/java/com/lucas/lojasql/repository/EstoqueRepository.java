@@ -72,6 +72,9 @@ public class EstoqueRepository implements EstoqueInterface {
 	public void insert(Estoque estoque) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement(
 					"INSERT INTO estoque " + "(Nome, Valor, CodigoBarras, Estoque) VALUES "
 							+ " (?, ?, ?, ?)",
@@ -79,6 +82,8 @@ public class EstoqueRepository implements EstoqueInterface {
 
 			preencheInterrogacoesEstoque(estoque, ps);
 			int linhasAdicionadas = ps.executeUpdate();
+			
+			conn.commit();
 
 			if (linhasAdicionadas > 0) {
 				ResultSet rs = setaIdDeTodosProdutosAdicionados(estoque, ps);
@@ -87,9 +92,12 @@ public class EstoqueRepository implements EstoqueInterface {
 				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
 			}
 		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
-		} finally {
-			DB.closeStatement(ps);
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
 		}
 	}
 
@@ -98,16 +106,24 @@ public class EstoqueRepository implements EstoqueInterface {
 	public void update(Estoque estoque) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("UPDATE estoque SET Nome = ?, Valor = ?, CodigoBarras = ?"
 					+ ", Estoque = ? WHERE id = ?");
 			preencheInterrogacoesEstoque(estoque, ps);
 			ps.setInt(5, estoque.getId());
 			ps.executeUpdate();
-			ps.executeUpdate();
+			
+			conn.commit();
+			
 		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
-		} finally {
-			DB.closeStatement(ps);
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
 		}
 	}
 
@@ -115,13 +131,22 @@ public class EstoqueRepository implements EstoqueInterface {
 	public void deleteByCodigoBarras(Integer codigoDeBarras) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("DELETE FROM estoque WHERE CodigoBarras = ?");
 			ps.setInt(1, codigoDeBarras);
 			ps.executeUpdate();
+			
+			conn.commit();
+			
 		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
-		} finally {
-			DB.closeStatement(ps);
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
 		}
 	}
 	
@@ -129,14 +154,23 @@ public class EstoqueRepository implements EstoqueInterface {
 	public void updateQuantidadeEstoqueDoProduto(Integer quantidade, Integer id) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("UPDATE estoque SET Estoque = ? WHERE id = ?");
 			ps.setInt(1, quantidade);
 			ps.setInt(2, id);
 			ps.executeUpdate();
+			
+			conn.commit();
+			
 		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
-		} finally {
-			DB.closeStatement(ps);
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
 		}
 	}
 	

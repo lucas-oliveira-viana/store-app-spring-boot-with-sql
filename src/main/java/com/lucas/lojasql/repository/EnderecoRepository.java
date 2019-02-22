@@ -74,6 +74,49 @@ public class EnderecoRepository implements EnderecoInterface {
 		}
 	}
 
+	@Override
+	public void insert(Endereco endereco) {
+		PreparedStatement ps = null;
+		try {
+
+			conn.setAutoCommit(false);
+
+			ps = conn.prepareStatement("INSERT INTO endereco (Cep, Pais, Estado, Cidade, Bairro, Rua, Numero) VALUES "
+					+ " (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+			preecheInterrogacoesEndereco(endereco, ps);
+			int linhasAdicionadas = ps.executeUpdate();
+
+			conn.commit();
+
+			if (linhasAdicionadas > 0) {
+				ResultSet rs = setaIdDeTodosAdicionados(endereco, ps);
+				DB.closeResultSet(rs);
+			} else {
+				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
+			}
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
+		}
+	}
+	
+	@Override
+	public void update(Endereco endereco) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteById(String id) {
+		// TODO Auto-generated method stub
+
+	}
+
 	private Endereco pegaColunasDaTabelaEndereco(ResultSet rs) throws SQLException {
 		Endereco endereco = new Endereco();
 		endereco.setId(rs.getInt("Id"));
@@ -87,41 +130,6 @@ public class EnderecoRepository implements EnderecoInterface {
 		return endereco;
 	}
 
-	@Override
-	public void insert(Endereco endereco) {
-		PreparedStatement ps = null;
-		try {
-			ps = conn.prepareStatement("INSERT INTO endereco (Cep, Pais, Estado, Cidade, Bairro, Rua, Numero) VALUES "
-					+ " (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-
-			preecheInterrogacoesEndereco(endereco, ps);
-			int linhasAdicionadas = ps.executeUpdate();
-
-			if (linhasAdicionadas > 0) {
-				ResultSet rs = setaIdDeTodosAdicionados(endereco, ps);
-				DB.closeResultSet(rs);
-			} else {
-				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
-			}
-		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
-		} finally {
-			DB.closeStatement(ps);
-		}
-	}
-
-	@Override
-	public void update(Endereco endereco) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public void deleteById(String id) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	private ResultSet setaIdDeTodosAdicionados(Endereco endereco, PreparedStatement ps) throws SQLException {
 		ResultSet rs = ps.getGeneratedKeys();
 		if (rs.next()) {
@@ -140,6 +148,5 @@ public class EnderecoRepository implements EnderecoInterface {
 		ps.setString(6, endereco.getRua());
 		ps.setString(7, endereco.getNumero());
 	}
-
 
 }

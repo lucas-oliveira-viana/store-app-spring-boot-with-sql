@@ -31,6 +31,9 @@ public class CompraRepository implements CompraInterface {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("SELECT * FROM compra c " + 
 									   "JOIN cesta s ON s.id_compra = c.id " +
 									   "JOIN estoque e ON s.id_estoque = e.id " +
@@ -39,6 +42,8 @@ public class CompraRepository implements CompraInterface {
 									   "JOIN funcionario f ON c.id_funcionario = f.id " +
 									   "JOIN endereco x ON f.id_endereco = x.id;");
 			rs = ps.executeQuery();
+			
+			conn.commit();
 
 			List<Compra> compras = new ArrayList<>();
 			List<ProdutoComprado> produtosComprados = new ArrayList<>();
@@ -56,7 +61,12 @@ public class CompraRepository implements CompraInterface {
 			}
 			return null;
 		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
 		} finally {
 			DB.fecharConexoes(ps, rs);
 		}
@@ -68,6 +78,7 @@ public class CompraRepository implements CompraInterface {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
+			
 			ps = conn.prepareStatement("SELECT * FROM compra c " + 
 					"JOIN cesta s ON s.id_compra = c.id " + 
 					"JOIN estoque e ON s.id_estoque = e.id " + 
@@ -90,7 +101,12 @@ public class CompraRepository implements CompraInterface {
 			}
 			return null;
 		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
 		} finally {
 			DB.fecharConexoes(ps, rs);
 		}
@@ -137,12 +153,17 @@ public class CompraRepository implements CompraInterface {
 	public void insert(Compra compra) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("INSERT INTO compra "
 					+ "(id_cliente, id_funcionario, FormaPagamento, ValorTotal) VALUES " + " (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 
 			preencheInterrogacoesCompra(compra, ps);
 			int linhasAfetadas = ps.executeUpdate();
+			
+			conn.commit();
 
 			if (linhasAfetadas > 0) {
 				ResultSet rs = setaIdDeTodasComprasAdicionadas(compra, ps);
@@ -161,13 +182,18 @@ public class CompraRepository implements CompraInterface {
 	public void update(Compra compraAtualizada) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("UPDATE compra c JOIN cesta s ON s.id_compra = c.id " + 
 									   "SET id_cliente = ?, id_funcionario = ?, FormaPagamento = ?, ValorTotal = ? " + 
 									   "WHERE id_compra = ?");
 			preencheInterrogacoesCompra(compraAtualizada, ps);
 			ps.setInt(5, compraAtualizada.getId());
-			
 			ps.executeUpdate();
+			
+			conn.commit();
+			
 		} catch (SQLException e) {
 			throw new DBException(e.getMessage());
 		} finally {
@@ -179,9 +205,15 @@ public class CompraRepository implements CompraInterface {
 	public void deleteById(Integer id) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("DELETE FROM compra WHERE id = ?");
 			ps.setInt(1, id);
 			ps.executeUpdate();
+			
+			conn.commit();
+			
 		} catch (SQLException e) {
 			throw new DBException(e.getMessage());
 		} finally {

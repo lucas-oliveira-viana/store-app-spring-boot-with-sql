@@ -21,12 +21,22 @@ public class CestaRepository implements CestaInterface {
 	public void insert(ProdutoComprado produtoComprado) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("INSERT INTO cesta " + "(id_estoque, id_compra) VALUES " + " (?, ?)");
-
 			preencheInterrogacoesCesta(produtoComprado, ps);
 			ps.execute();
+			
+			conn.commit();
+		
 		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
 		} finally {
 			DB.closeStatement(ps);
 		}
@@ -41,11 +51,22 @@ public class CestaRepository implements CestaInterface {
 	public void deleteById(Integer id) {
 		PreparedStatement ps = null;
 		try {
+			
+			conn.setAutoCommit(false);
+			
 			ps = conn.prepareStatement("DELETE FROM cesta WHERE id_compra = ?");
 			ps.setInt(1, id);
 			ps.executeUpdate();
+			
+			conn.commit();
+			
 		} catch (SQLException e) {
-			throw new DBException(e.getMessage());
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
 		} finally {
 			DB.closeStatement(ps);
 		}

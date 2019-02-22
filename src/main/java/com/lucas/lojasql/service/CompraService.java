@@ -56,23 +56,28 @@ public class CompraService implements CompraInterface {
 		} else {
 			throw new UserException("Cliente não existe");
 		}
+		
 		if (findByCpfFuncionario != null) {
 			compra.getFuncionario().setId(findByCpfFuncionario.getId());
 		} else {
 			throw new UserException("Funcionario não existe");
 		}
 		
-		for (ProdutoComprado produtoComprado : produtosComprados) {
-			if (verificaSeProdutoCompradoExisteNoEstoque(produtoComprado)) {
-				retiraDoEstoque(produtoComprado);
-			}
-		}
+		retiraProdutosDoEstoque(produtosComprados);
 		
 		createCompraDao().insert(compra);
 		
 		setaValorDeCadaProduto(produtosComprados);
 
 		insereCadaProdutoNaCesta(compra, produtosComprados);
+	}
+
+	private void retiraProdutosDoEstoque(List<ProdutoComprado> produtosComprados) {
+		for (ProdutoComprado produtoComprado : produtosComprados) {
+			if (verificaSeProdutoCompradoExisteNoEstoque(produtoComprado)) {
+				retiraDoEstoque(produtoComprado);
+			}
+		}
 	}
 
 	@Override
@@ -114,6 +119,7 @@ public class CompraService implements CompraInterface {
 			throw new InsufficientEstoqueException("Existem " + quantidadeDeEstoqueDoProdutoComprado
 					+ " unidades" + " de " + produtoComprado.getNome() + " no estoque!");
 		}
+		
 		Integer quantidadeEstoqueProdutoAtualizada = quantidadeDeEstoqueDoProdutoComprado - quantidadeProdutoComprada;
 		
 		createEstoqueDao().updateQuantidadeEstoqueDoProduto(quantidadeEstoqueProdutoAtualizada, produtoCompradoNoEstoque.getId());
