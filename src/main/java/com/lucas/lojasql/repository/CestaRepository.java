@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.lucas.lojasql.entities.ProdutoComprado;
+import com.lucas.lojasql.exception.db.DBException;
 import com.lucas.lojasql.interfaces.CestaInterface;
 import com.lucas.lojasql.jdbc.DB;
-import com.lucas.lojasql.jdbc.DBException;
 
 public class CestaRepository implements CestaInterface {
 

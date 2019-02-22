@@ -19,9 +19,8 @@ public class EnderecoService implements EnderecoInterface{
 	}
 
 	@Override
-	public Endereco findById(String id) {
-		// TODO Auto-generated method stub
-		return null;
+	public Endereco findById(Integer id) {
+		return createEnderecoDao().findById(id);
 	}
 
 	@Override
@@ -36,13 +35,11 @@ public class EnderecoService implements EnderecoInterface{
 
 	@Override
 	public void update(Endereco endereco) {
-		// TODO Auto-generated method stub
-		
+		createEnderecoDao().update(endereco);
 	}
 
 	@Override
-	public void deleteById(String id) {
-		// TODO Auto-generated method stub
-		
+	public void deleteById(Integer id) {
+		createEnderecoDao().deleteById(id);
 	}
 }

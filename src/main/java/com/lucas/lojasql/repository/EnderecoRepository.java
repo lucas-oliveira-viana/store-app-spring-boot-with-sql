@@ -1,5 +1,8 @@
 package com.lucas.lojasql.repository;
 
+import static com.lucas.lojasql.utils.repository.MapeamentoColunas.setColunasTabelaEndereco;
+import static com.lucas.lojasql.utils.repository.MapeamentoColunas.setaIdDeCadaEndereco;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,13 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lucas.lojasql.entities.Endereco;
+import com.lucas.lojasql.exception.db.DBException;
 import com.lucas.lojasql.interfaces.EnderecoInterface;
 import com.lucas.lojasql.jdbc.DB;
-import com.lucas.lojasql.jdbc.DBException;
 
 public class EnderecoRepository implements EnderecoInterface {
-
-	private static final int COLUNA_ID = 1;
 	private Connection conn;
 
 	public EnderecoRepository(Connection conn) {
@@ -33,7 +34,7 @@ public class EnderecoRepository implements EnderecoInterface {
 			List<Endereco> enderecos = new ArrayList<>();
 
 			while (rs.next()) {
-				enderecos.add(pegaColunasDaTabelaEndereco(rs));
+				enderecos.add(setColunasTabelaEndereco(rs));
 			}
 
 			if (enderecos.size() > 0) {
@@ -48,9 +49,24 @@ public class EnderecoRepository implements EnderecoInterface {
 	}
 
 	@Override
-	public Endereco findById(String id) {
-		// TODO Auto-generated method stub
-		return null;
+	public Endereco findById(Integer id) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT * FROM endereco WHERE Id = ?");
+			ps.setInt(1, id);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Endereco endereco = setColunasTabelaEndereco(rs);
+				return endereco;
+			}
+			throw new DBException("Erro ao encontrar endereco!");
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		} finally {
+			DB.fecharConexoes(ps, rs);
+		}
 	}
 
 	@Override
@@ -63,7 +79,7 @@ public class EnderecoRepository implements EnderecoInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Endereco endereco = pegaColunasDaTabelaEndereco(rs);
+				Endereco endereco = setColunasTabelaEndereco(rs);
 				return endereco;
 			}
 			throw new DBException("Erro ao encontrar endereco!");
@@ -84,13 +100,13 @@ public class EnderecoRepository implements EnderecoInterface {
 			ps = conn.prepareStatement("INSERT INTO endereco (Cep, Pais, Estado, Cidade, Bairro, Rua, Numero) VALUES "
 					+ " (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
-			preecheInterrogacoesEndereco(endereco, ps);
+			preencheInterrogacoesEndereco(endereco, ps);
 			int linhasAdicionadas = ps.executeUpdate();
 
 			conn.commit();
 
 			if (linhasAdicionadas > 0) {
-				ResultSet rs = setaIdDeTodosAdicionados(endereco, ps);
+				ResultSet rs = setaIdDeCadaEndereco(endereco, ps);
 				DB.closeResultSet(rs);
 			} else {
 				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
@@ -107,39 +123,56 @@ public class EnderecoRepository implements EnderecoInterface {
 	
 	@Override
 	public void update(Endereco endereco) {
-		// TODO Auto-generated method stub
-
+		PreparedStatement ps = null;
+		try {
+			
+			conn.setAutoCommit(false);
+			ps = conn.prepareStatement("UPDATE endereco SET Cep = ?, Pais = ?, Estado = ?"
+					+ ", Cidade = ?, Bairro = ?, Rua = ?, Numero = ? WHERE id = ?");
+			preencheInterrogacoesEndereco(endereco, ps);
+			ps.setInt(8, endereco.getId());
+			ps.executeUpdate();
+			
+			conn.commit();
+			
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
+		} finally {
+			DB.closeStatement(ps);
+		}
 	}
 
 	@Override
-	public void deleteById(String id) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private Endereco pegaColunasDaTabelaEndereco(ResultSet rs) throws SQLException {
-		Endereco endereco = new Endereco();
-		endereco.setId(rs.getInt("Id"));
-		endereco.setCep(rs.getString("Cep"));
-		endereco.setPais(rs.getString("Pais"));
-		endereco.setEstado(rs.getString("Estado"));
-		endereco.setCidade(rs.getString("Cidade"));
-		endereco.setBairro(rs.getString("Bairro"));
-		endereco.setRua(rs.getString("Rua"));
-		endereco.setNumero(rs.getString("Numero"));
-		return endereco;
-	}
-
-	private ResultSet setaIdDeTodosAdicionados(Endereco endereco, PreparedStatement ps) throws SQLException {
-		ResultSet rs = ps.getGeneratedKeys();
-		if (rs.next()) {
-			int id = rs.getInt(COLUNA_ID);
-			endereco.setId(id);
+	public void deleteById(Integer id) {
+		PreparedStatement ps = null;
+		try {
+			
+			conn.setAutoCommit(false);
+			
+			ps = conn.prepareStatement("DELETE FROM endereco WHERE id = ?");
+			ps.setInt(1, id);
+			ps.executeUpdate();
+			
+			conn.commit();
+			
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
+		} finally {
+			DB.closeStatement(ps);
 		}
-		return rs;
 	}
 
-	private void preecheInterrogacoesEndereco(Endereco endereco, PreparedStatement ps) throws SQLException {
+	private void preencheInterrogacoesEndereco(Endereco endereco, PreparedStatement ps) throws SQLException {
 		ps.setString(1, endereco.getCep());
 		ps.setString(2, endereco.getPais());
 		ps.setString(3, endereco.getEstado());

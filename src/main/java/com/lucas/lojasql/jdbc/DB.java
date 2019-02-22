@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import com.lucas.lojasql.exception.db.DBException;
+
 public class DB {
 
 	private static final String DBURL_ARQUIVOPROPERTIES = "dburl";

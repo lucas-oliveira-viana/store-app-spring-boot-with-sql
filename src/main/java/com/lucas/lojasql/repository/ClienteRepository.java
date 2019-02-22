@@ -1,5 +1,8 @@
 package com.lucas.lojasql.repository;
 
+import static com.lucas.lojasql.utils.repository.MapeamentoColunas.setColunasTabelaCliente;
+import static com.lucas.lojasql.utils.repository.MapeamentoColunas.setaIdDeCadaCliente;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,14 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lucas.lojasql.entities.Cliente;
-import com.lucas.lojasql.entities.Endereco;
+import com.lucas.lojasql.exception.db.DBException;
 import com.lucas.lojasql.interfaces.ClienteInterface;
 import com.lucas.lojasql.jdbc.DB;
-import com.lucas.lojasql.jdbc.DBException;
+import com.lucas.lojasql.utils.repository.MapeamentoColunas;
 
 public class ClienteRepository implements ClienteInterface {
-
-	private static final int COLUNA_ID = 1;
+	
 	private Connection conn;
 
 	public ClienteRepository(Connection conn) {
@@ -34,7 +36,7 @@ public class ClienteRepository implements ClienteInterface {
 			List<Cliente> clientes = new ArrayList<>();
 
 			while (rs.next()) {
-				clientes.add(getColunasDaTabelaCliente(rs));
+				clientes.add(setColunasTabelaCliente(rs));
 			}
 
 			if (clientes.size() > 0) {
@@ -59,7 +61,7 @@ public class ClienteRepository implements ClienteInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Cliente cliente = getColunasDaTabelaCliente(rs);
+				Cliente cliente = setColunasTabelaCliente(rs);
 				return cliente;
 			}
 			return null;
@@ -80,7 +82,7 @@ public class ClienteRepository implements ClienteInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Cliente cliente = getColunasDaTabelaCliente(rs);
+				Cliente cliente = setColunasTabelaCliente(rs);
 				return cliente;
 			}
 			return null;
@@ -101,7 +103,7 @@ public class ClienteRepository implements ClienteInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Cliente cliente = getColunasDaTabelaCliente(rs);
+				Cliente cliente = setColunasTabelaCliente(rs);
 				return cliente;
 			}
 			return null;
@@ -123,7 +125,7 @@ public class ClienteRepository implements ClienteInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Cliente cliente = getColunasDaTabelaCliente(rs);
+				Cliente cliente = MapeamentoColunas.setColunasTabelaCliente(rs);
 				return cliente;
 			}
 			return null;
@@ -152,7 +154,7 @@ public class ClienteRepository implements ClienteInterface {
 			conn.commit();
 
 			if (linhasAdicionadas > 0) {
-				ResultSet rs = setaIdDeTodosClientesAdicionados(cliente, ps);
+				ResultSet rs = setaIdDeCadaCliente(cliente, ps);
 				DB.closeResultSet(rs);
 			} else {
 				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
@@ -218,30 +220,6 @@ public class ClienteRepository implements ClienteInterface {
 		} finally {
 			DB.closeStatement(ps);
 		}
-	}
-
-	private ResultSet setaIdDeTodosClientesAdicionados(Cliente cliente, PreparedStatement ps) throws SQLException {
-		ResultSet rs = ps.getGeneratedKeys();
-		while (rs.next()) {
-			cliente.setId(rs.getInt(COLUNA_ID));
-		}
-		return rs;
-	}
-
-	private Cliente getColunasDaTabelaCliente(ResultSet rs) throws SQLException {
-		Cliente cliente = new Cliente();
-		cliente.setId(rs.getInt("Id"));
-		cliente.setNome(rs.getString("Nome"));
-		cliente.setDataNascimento(rs.getDate("DataNascimento"));
-		cliente.setCpf(rs.getString("Cpf"));
-		cliente.setRg(rs.getString("Rg"));
-		cliente.setEmail(rs.getString("Email"));
-		cliente.setTelefone(rs.getString("Telefone"));
-		cliente.setEndereco(new Endereco(rs.getString("Cep"), rs.getString("Pais"), rs.getString("Estado"),
-				rs.getString("Cidade"), rs.getString("Bairro"), rs.getString("Rua"), rs.getString("Numero")));
-		cliente.getEndereco().setId(rs.getInt("id_endereco"));
-
-		return cliente;
 	}
 
 	private void preencheInterrogacoesCliente(Cliente cliente, PreparedStatement ps) throws SQLException {

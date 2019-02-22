@@ -1,5 +1,8 @@
 package com.lucas.lojasql.repository;
 
+import static com.lucas.lojasql.utils.repository.MapeamentoColunas.setColunasTabelaFuncionario;
+import static com.lucas.lojasql.utils.repository.MapeamentoColunas.setaIdDeCadaFuncionario;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,15 +11,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lucas.lojasql.entities.Endereco;
 import com.lucas.lojasql.entities.Funcionario;
+import com.lucas.lojasql.exception.db.DBException;
 import com.lucas.lojasql.interfaces.FuncionarioInterface;
 import com.lucas.lojasql.jdbc.DB;
-import com.lucas.lojasql.jdbc.DBException;
 
 public class FuncionarioRepository implements FuncionarioInterface {
-
-	private static final int COLUNA_ID = 1;
+	
 	private Connection conn;
 
 	public FuncionarioRepository(Connection conn) {
@@ -34,7 +35,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 			List<Funcionario> funcionarios = new ArrayList<>();
 
 			while (rs.next()) {
-				funcionarios.add(getColunasDaTabelaFuncionario(rs));
+				funcionarios.add(setColunasTabelaFuncionario(rs));
 			}
 			if (funcionarios.size() > 0) {
 				return funcionarios;
@@ -58,7 +59,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Funcionario funcionario = getColunasDaTabelaFuncionario(rs);
+				Funcionario funcionario = setColunasTabelaFuncionario(rs);
 				return funcionario;
 			}
 			return null;
@@ -80,7 +81,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Funcionario funcionario = getColunasDaTabelaFuncionario(rs);
+				Funcionario funcionario = setColunasTabelaFuncionario(rs);
 				return funcionario;
 			}
 			return null;
@@ -102,7 +103,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Funcionario funcionario = getColunasDaTabelaFuncionario(rs);
+				Funcionario funcionario = setColunasTabelaFuncionario(rs);
 				return funcionario;
 			}
 			return null;
@@ -124,7 +125,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Funcionario funcionario = getColunasDaTabelaFuncionario(rs);
+				Funcionario funcionario = setColunasTabelaFuncionario(rs);
 				return funcionario;
 			}
 			return null;
@@ -153,7 +154,7 @@ public class FuncionarioRepository implements FuncionarioInterface {
 			conn.commit();
 
 			if (linhasAdicionadas > 0) {
-				ResultSet rs = setaIdDeTodosAdicionados(funcionario, ps);
+				ResultSet rs = setaIdDeCadaFuncionario(funcionario, ps);
 				DB.closeResultSet(rs);
 			} else {
 				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
@@ -205,32 +206,6 @@ public class FuncionarioRepository implements FuncionarioInterface {
 		} finally {
 			DB.closeStatement(ps);
 		}
-	}
-
-	private ResultSet setaIdDeTodosAdicionados(Funcionario funcionario, PreparedStatement ps) throws SQLException {
-		ResultSet rs = ps.getGeneratedKeys();
-		if (rs.next()) {
-			int id = rs.getInt(COLUNA_ID);
-			funcionario.setId(id);
-		}
-		return rs;
-	}
-
-	private Funcionario getColunasDaTabelaFuncionario(ResultSet rs) throws SQLException {
-		Funcionario funcionario = new Funcionario();
-		funcionario.setId(rs.getInt("Id"));
-		funcionario.setNome(rs.getString("Nome"));
-		funcionario.setDataNascimento(rs.getDate("DataNascimento"));
-		funcionario.setCpf(rs.getString("Cpf"));
-		funcionario.setRg(rs.getString("Rg"));
-		funcionario.setEmail(rs.getString("Email"));
-		funcionario.setTelefone(rs.getString("Telefone"));
-		funcionario.setEndereco(new Endereco(rs.getString("Cep"), rs.getString("Pais"), rs.getString("Estado"),
-				rs.getString("Cidade"), rs.getString("Bairro"), rs.getString("Rua"), rs.getString("Numero")));
-		funcionario.getEndereco().setId(rs.getInt("id_endereco"));
-		funcionario.setCargo(rs.getString("Cargo"));
-
-		return funcionario;
 	}
 
 	private void preencheInterrogacoesFuncionario(Funcionario funcionario, PreparedStatement ps) throws SQLException {

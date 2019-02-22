@@ -1,5 +1,7 @@
 package com.lucas.lojasql.repository;
 
+import static com.lucas.lojasql.utils.repository.MapeamentoColunas.setColunasTabelaEstoque;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,13 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lucas.lojasql.entities.Estoque;
+import com.lucas.lojasql.exception.db.DBException;
 import com.lucas.lojasql.interfaces.EstoqueInterface;
 import com.lucas.lojasql.jdbc.DB;
-import com.lucas.lojasql.jdbc.DBException;
+import com.lucas.lojasql.utils.repository.MapeamentoColunas;
 
 public class EstoqueRepository implements EstoqueInterface {
-
-	private static final int COLUNA_ID = 1;
+	
 	private Connection conn;
 
 	public EstoqueRepository(Connection conn) {
@@ -33,7 +35,7 @@ public class EstoqueRepository implements EstoqueInterface {
 			List<Estoque> produtosEmEstoque = new ArrayList<>();
 
 			while (rs.next()) {
-				produtosEmEstoque.add(pegaColunasDaTabelaEstoque(rs));
+				produtosEmEstoque.add(setColunasTabelaEstoque(rs));
 			}
 
 			if (produtosEmEstoque.size() > 0) {
@@ -57,7 +59,7 @@ public class EstoqueRepository implements EstoqueInterface {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Estoque estoque = pegaColunasDaTabelaEstoque(rs);
+				Estoque estoque = setColunasTabelaEstoque(rs);
 				return estoque;
 			}
 			throw new DBException("Erro ao encontrar produto!");
@@ -86,7 +88,7 @@ public class EstoqueRepository implements EstoqueInterface {
 			conn.commit();
 
 			if (linhasAdicionadas > 0) {
-				ResultSet rs = setaIdDeTodosProdutosAdicionados(estoque, ps);
+				ResultSet rs = MapeamentoColunas.setaIdDeCadaProduto(estoque, ps);
 				DB.closeResultSet(rs);
 			} else {
 				throw new DBException("Erro inesperado! Nenhuma linha adicionada!");
@@ -172,24 +174,6 @@ public class EstoqueRepository implements EstoqueInterface {
 				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
 			}
 		}
-	}
-	
-	private Estoque pegaColunasDaTabelaEstoque(ResultSet rs) throws SQLException {
-		Estoque estoque = new Estoque();
-		estoque.setId(rs.getInt("Id"));
-		estoque.setNome(rs.getString("Nome"));
-		estoque.setValor(rs.getDouble("Valor"));
-		estoque.setCodigoBarras(rs.getInt("CodigoBarras"));
-		estoque.setEstoque(rs.getInt("Estoque"));
-		return estoque;
-	}
-	
-	private ResultSet setaIdDeTodosProdutosAdicionados(Estoque estoque, PreparedStatement ps) throws SQLException {
-		ResultSet rs = ps.getGeneratedKeys();
-		while (rs.next()) {
-			estoque.setId(rs.getInt(COLUNA_ID));
-		}
-		return rs;
 	}
 	
 	private void preencheInterrogacoesEstoque(Estoque estoque, PreparedStatement ps) throws SQLException {

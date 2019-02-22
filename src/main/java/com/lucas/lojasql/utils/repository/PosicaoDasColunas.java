@@ -1,4 +1,4 @@
-package com.lucas.lojasql.utils;
+package com.lucas.lojasql.utils.repository;
 
 public class PosicaoDasColunas {
 	

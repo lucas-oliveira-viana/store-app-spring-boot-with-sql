@@ -8,7 +8,7 @@ public interface EnderecoInterface {
 
 	List<Endereco> findAll();
 	
-	Endereco findById(String id);
+	Endereco findById(Integer id);
 	
 	Endereco findByCep(String cep);
 	
@@ -16,5 +16,5 @@ public interface EnderecoInterface {
 	
 	void update(Endereco endereco);
 	
-	void deleteById(String id);
+	void deleteById(Integer id);
 }
