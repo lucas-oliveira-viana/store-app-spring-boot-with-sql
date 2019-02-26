@@ -36,7 +36,7 @@ public class CompraDTO {
 		this.id = id;
 	}
 	
-	public List<ProdutoComprado> getCesta() {
+	public List<ProdutoComprado> getProdutosComprados() {
 		return produtosComprados;
 	}
 

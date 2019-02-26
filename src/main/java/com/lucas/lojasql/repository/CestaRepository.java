@@ -48,7 +48,7 @@ public class CestaRepository implements CestaInterface {
 	}
 
 	@Override
-	public void deleteById(Integer id) {
+	public void deleteCestaByIdCompra(Integer id) {
 		PreparedStatement ps = null;
 		try {
 			

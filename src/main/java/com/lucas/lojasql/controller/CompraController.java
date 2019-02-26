@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lucas.lojasql.dto.CompraDTO;
 import com.lucas.lojasql.entities.Compra;
+import com.lucas.lojasql.entities.ProdutoComprado;
 import com.lucas.lojasql.service.CompraService;
 import com.lucas.lojasql.utils.FromDTO;
 import com.lucas.lojasql.utils.URL;
@@ -51,10 +52,10 @@ public class CompraController {
 	}
 
 	@PostMapping(value = "/comprar")
-	public ResponseEntity<Compra> realizarCompra(@RequestBody CompraDTO compraDTO) {
+	public ResponseEntity<String> realizarCompra(@RequestBody CompraDTO compraDTO) {
 		Compra compra = FromDTO.fromDTOCompra(compraDTO);
 		compraService.insert(compra);
-		return ResponseEntity.ok().body(compra);
+		return ResponseEntity.ok().body("Compra realizada com sucesso!\n" + toStringRelatorioCompra(compra));
 	}
 
 	@DeleteMapping(value = "/deletar/{id}")
@@ -69,5 +70,22 @@ public class CompraController {
 		compraAtualizada.setId(id);
 		compraService.update(compraAtualizada);
 		return ResponseEntity.ok().body("A compra foi atualizada com sucesso!");
+	}
+	
+	private String toStringRelatorioCompra(Compra compra) {
+		String msg = "\nProdutos Comprados: \n" + toStringProdutosComprados(compra) + "\n" +
+					 "Nome do Cliente: " + compra.getCliente().getNome() + "\n" +
+					 "Nome do Funcionário: " + compra.getFuncionario().getNome() + "\n" +
+					 "Forma de Pagamento: " + compra.getFormaPagamento() + "\n" +
+					 "Valor Total: " + compra.getValorTotal();
+		return msg;
+	}
+	
+	private String toStringProdutosComprados(Compra compra) {
+		String msg = "";
+		for (ProdutoComprado produtoComprado : compra.getProdutosComprados()) {
+			msg += "Produto: " + produtoComprado.getNome() + ", " + "Quantidade: " + produtoComprado.getQuantidade() + "\n";
+		}
+		return msg;
 	}
 }

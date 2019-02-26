@@ -6,5 +6,5 @@ public interface CestaInterface {
 
 	void insert(ProdutoComprado produtoComprado);
 	
-	void deleteById(Integer id);
+	void deleteCestaByIdCompra(Integer id);
 }

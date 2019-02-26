@@ -3,6 +3,7 @@ package com.lucas.lojasql.interfaces;
 import java.util.List;
 
 import com.lucas.lojasql.entities.Estoque;
+import com.lucas.lojasql.entities.ProdutoComprado;
 
 public interface EstoqueInterface {
 
@@ -16,5 +17,9 @@ public interface EstoqueInterface {
 	
 	void deleteByCodigoBarras(Integer codigoDeBarras);
 
-	void updateQuantidadeEstoqueDoProduto(Integer quantidade, Integer id);
+	void modificarQuantidadeDoEstoqueDeUmProduto(Integer quantidade, Integer id);
+	
+	void retiraDoEstoque(ProdutoComprado produtoComprado);
+	
+	boolean verificaSeExisteNoEstoque(Integer codigoBarras);
 }

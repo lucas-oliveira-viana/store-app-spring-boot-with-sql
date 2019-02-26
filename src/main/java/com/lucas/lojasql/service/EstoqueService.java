@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.lucas.lojasql.entities.Estoque;
+import com.lucas.lojasql.entities.ProdutoComprado;
 import com.lucas.lojasql.interfaces.EstoqueInterface;
 
 @Service
@@ -38,7 +39,17 @@ public class EstoqueService implements EstoqueInterface{
 	}
 
 	@Override
-	public void updateQuantidadeEstoqueDoProduto(Integer quantidade, Integer id) {
-		createEstoqueDao().updateQuantidadeEstoqueDoProduto(quantidade, id);
+	public void modificarQuantidadeDoEstoqueDeUmProduto(Integer quantidade, Integer id) {
+		createEstoqueDao().modificarQuantidadeDoEstoqueDeUmProduto(quantidade, id);
+	}
+
+	@Override
+	public void retiraDoEstoque(ProdutoComprado produtoComprado) {
+		createEstoqueDao().retiraDoEstoque(produtoComprado);
+	}
+
+	@Override
+	public boolean verificaSeExisteNoEstoque(Integer codigoBarras) {
+		return createEstoqueDao().verificaSeExisteNoEstoque(codigoBarras);
 	}
 }

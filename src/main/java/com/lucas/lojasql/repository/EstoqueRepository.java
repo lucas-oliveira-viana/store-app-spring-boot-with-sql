@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lucas.lojasql.entities.Estoque;
+import com.lucas.lojasql.entities.ProdutoComprado;
 import com.lucas.lojasql.exception.db.DBException;
 import com.lucas.lojasql.interfaces.EstoqueInterface;
 import com.lucas.lojasql.jdbc.DB;
@@ -153,7 +154,7 @@ public class EstoqueRepository implements EstoqueInterface {
 	}
 	
 	@Override
-	public void updateQuantidadeEstoqueDoProduto(Integer quantidade, Integer id) {
+	public void modificarQuantidadeDoEstoqueDeUmProduto(Integer quantidade, Integer id) {
 		PreparedStatement ps = null;
 		try {
 			
@@ -176,11 +177,67 @@ public class EstoqueRepository implements EstoqueInterface {
 		}
 	}
 	
+
+	@Override
+	public void retiraDoEstoque(ProdutoComprado produtoComprado) {
+		PreparedStatement ps = null;
+		try {
+			
+			conn.setAutoCommit(false);
+			
+			ps = conn.prepareStatement("CALL removerDoEstoque(?, ?);");
+			ps.setInt(1, produtoComprado.getCodigoBarras());
+			ps.setInt(2, produtoComprado.getQuantidade());
+			
+			int linhasAdicionadas = ps.executeUpdate();
+			
+			if (linhasAdicionadas == 0) {
+				throw new DBException("Não há estoque suficiente de:" + produtoComprado + ", quantidade em estoque: " + produtoComprado.getQuantidade());
+			}
+			
+			conn.commit();
+			
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+				throw new DBException("Transação não foi concluida! Erro: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DBException("Erro no Rollback! Erro: " + e1.getMessage());
+			}
+		}
+	}
+
+	@Override
+	public boolean verificaSeExisteNoEstoque(Integer codigoBarras) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement("SELECT (SELECT COUNT(*) FROM estoque WHERE CodigoBarras = ?) > 0;");
+			ps.setInt(1, codigoBarras);
+			rs = ps.executeQuery();
+			
+			Integer booleano = 0;
+			
+			if (rs.next()) {
+			booleano = rs.getInt(1);
+			}
+			
+			if (booleano == 1) {
+				return true;
+			} 
+			return false;
+			
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		} finally {
+			DB.fecharConexoes(ps, rs);
+		}
+	}
+
 	private void preencheInterrogacoesEstoque(Estoque estoque, PreparedStatement ps) throws SQLException {
 		ps.setString(1, estoque.getNome());
 		ps.setDouble(2, estoque.getValor());
 		ps.setInt(3, estoque.getCodigoBarras());
 		ps.setInt(4, estoque.getEstoque());
 	}
-
 }

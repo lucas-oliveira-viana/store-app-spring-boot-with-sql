@@ -1,12 +1,11 @@
 package com.lucas.lojasql.service;
 
-import static com.lucas.lojasql.gerenciador.GerenciadorDeProdutos.insereCadaProdutoNaCesta;
-import static com.lucas.lojasql.gerenciador.GerenciadorDeProdutos.retiraProdutosDoEstoque;
 import static com.lucas.lojasql.interfaces.DaoFactory.createCestaDao;
 import static com.lucas.lojasql.interfaces.DaoFactory.createClienteDao;
 import static com.lucas.lojasql.interfaces.DaoFactory.createCompraDao;
+import static com.lucas.lojasql.interfaces.DaoFactory.createEstoqueDao;
 import static com.lucas.lojasql.interfaces.DaoFactory.createFuncionarioDao;
-import static com.lucas.lojasql.utils.Calculadora.setaValorDeCadaProduto;
+import static com.lucas.lojasql.utils.Calculadora.setaValorDeCadaProdutoDaCesta;
 import static com.lucas.lojasql.utils.Calculadora.setaValorTotalDaCompra;
 
 import java.util.List;
@@ -15,9 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.lucas.lojasql.entities.Cliente;
 import com.lucas.lojasql.entities.Compra;
+import com.lucas.lojasql.entities.Estoque;
 import com.lucas.lojasql.entities.Funcionario;
 import com.lucas.lojasql.entities.ProdutoComprado;
 import com.lucas.lojasql.exception.UserException;
+import com.lucas.lojasql.exception.produto.ProdutoNotFoundException;
 import com.lucas.lojasql.interfaces.CompraInterface;
 
 @Service
@@ -40,9 +41,8 @@ public class CompraService implements CompraInterface {
 
 	@Override
 	public void insert(Compra compra) {
-		
-		setaValorTotalDaCompra(compra);
-		
+
+
 		String cpfCliente = compra.getCliente().getCPF();
 		String cpfFuncionario = compra.getFuncionario().getCPF();
 		List<ProdutoComprado> produtosComprados = compra.getProdutosComprados();
@@ -55,18 +55,20 @@ public class CompraService implements CompraInterface {
 		} else {
 			throw new UserException("Cliente não existe");
 		}
-		
+
 		if (findByCpfFuncionario != null) {
 			compra.getFuncionario().setId(findByCpfFuncionario.getId());
 		} else {
 			throw new UserException("Funcionario não existe");
 		}
+
+		retiraVariosProdutosDoEstoque(produtosComprados);
 		
-		retiraProdutosDoEstoque(produtosComprados);
-		
+		setaValorTotalDaCompra(compra);
+
 		createCompraDao().insert(compra);
-		
-		setaValorDeCadaProduto(produtosComprados);
+
+		setaValorDeCadaProdutoDaCesta(produtosComprados);
 
 		insereCadaProdutoNaCesta(compra, produtosComprados);
 	}
@@ -76,7 +78,7 @@ public class CompraService implements CompraInterface {
 
 		List<ProdutoComprado> produtosComprados = compraAtualizada.getProdutosComprados();
 
-		setaValorDeCadaProduto(produtosComprados);
+		setaValorDeCadaProdutoDaCesta(produtosComprados);
 
 		setaValorTotalDaCompra(compraAtualizada);
 
@@ -87,14 +89,48 @@ public class CompraService implements CompraInterface {
 		createCompraDao().update(compraAtualizada);
 	}
 
-
 	@Override
 	public void deleteById(Integer id) {
 		createCompraDao().deleteById(id);
 	}
-	
-	private void limpaCesta(Compra compraAtualizada) {
-		createCestaDao().deleteById(compraAtualizada.getId());
+
+	private static void insereCadaProdutoNaCesta(Compra compra, List<ProdutoComprado> produtosComprados) {
+		for (ProdutoComprado produtoComprado : produtosComprados) {
+
+			Estoque findByCodigoBarras = createEstoqueDao().findByCodigoBarras(produtoComprado.getCodigoBarras());
+
+			if (findByCodigoBarras != null) {
+				produtoComprado.setIdCompra(compra.getId());
+				produtoComprado.setIdEstoque(findByCodigoBarras.getId());
+
+				createCestaDao().insert(produtoComprado);
+			}
+		}
 	}
-	
+
+	private void retiraVariosProdutosDoEstoque(List<ProdutoComprado> produtosComprados) {
+		for (ProdutoComprado produtoComprado : produtosComprados) {
+			retiraDoEstoque(produtoComprado);
+		}
+	}
+
+	private void retiraDoEstoque(ProdutoComprado produtoComprado) {
+		if (verificaSeExisteNoEstoque(produtoComprado.getCodigoBarras())) {
+			createEstoqueDao().retiraDoEstoque(produtoComprado);
+		} else {
+			throw new ProdutoNotFoundException("Produto " + produtoComprado.getNome() + " não existe no estoque");
+		}
+	}
+
+	private boolean verificaSeExisteNoEstoque(Integer codigoBarras) {
+		if (createEstoqueDao().verificaSeExisteNoEstoque(codigoBarras)) {
+			return true;
+		}
+		return false;
+	}
+
+	private void limpaCesta(Compra compraAtualizada) {
+		createCestaDao().deleteCestaByIdCompra(compraAtualizada.getId());
+	}
+
 }

@@ -24,7 +24,7 @@ public class Calculadora {
 				.collect(Collectors.toList());
 	}
 	
-	public static void setaValorDeCadaProduto(List<ProdutoComprado> produtosComprados) {
+	public static void setaValorDeCadaProdutoDaCesta(List<ProdutoComprado> produtosComprados) {
 		for (ProdutoComprado produtoComprado : produtosComprados) {
 			produtoComprado.setValorTotalProduto(produtoComprado
 					.calcularValorTotalCadaProduto(produtoComprado.getQuantidade(), produtoComprado.getValor()));

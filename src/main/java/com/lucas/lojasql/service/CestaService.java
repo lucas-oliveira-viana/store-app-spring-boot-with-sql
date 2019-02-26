@@ -15,8 +15,8 @@ public class CestaService implements CestaInterface{
 	}
 
 	@Override
-	public void deleteById(Integer id) {
-		DaoFactory.createCestaDao().deleteById(id);
+	public void deleteCestaByIdCompra(Integer id) {
+		DaoFactory.createCestaDao().deleteCestaByIdCompra(id);
 	}
 
 }

@@ -14,7 +14,7 @@ import com.lucas.lojasql.entities.Estoque;
 public class FromDTO {
 
 	public static Compra fromDTOCompra(CompraDTO compraDTO) {
-		return new Compra(compraDTO.getId(), compraDTO.getCesta(), compraDTO.getCliente(),
+		return new Compra(compraDTO.getId(), compraDTO.getProdutosComprados(), compraDTO.getCliente(),
 				compraDTO.getFuncionario(), compraDTO.getFormaPagamento());
 	}
 	public static Cliente fromDTOCliente(ClienteDTO clienteDTO) {
